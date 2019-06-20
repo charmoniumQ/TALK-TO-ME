@@ -1,0 +1,4 @@
+mypy
+pytest
+ipython[all]
+mypy_extensions
