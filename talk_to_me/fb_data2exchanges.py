@@ -77,15 +77,15 @@ def sort_paths(paths: Set[Tuple[str, ...]]) -> Tuple[Set[Tuple[str, ...]], ...]:
 
 
 def message2exchanges(name: str, obj: Any) -> Iterable[Exchange]:
-    messages = obj['messages']
+    messages = sorted(obj['messages'], key=lambda message: message['timestamp_ms'])
     for msg1, msg2 in zip(messages[:-1], messages[1:]):
         if msg2['sender_name'] == name:
             if 'content'in msg1 and 'content' in msg2:
                 # print(msg1['content'], '->', msg2['content'])
                 # TODO: Stop ignoring unicode smileys ('\u263A')
                 yield (
-                    sent2words(unidecode(msg1['content'])),
-                    sent2words(unidecode(msg2['content'])),
+                    list(filter(bool, sent2words(unidecode(msg1['content'])))),
+                    list(filter(bool, sent2words(unidecode(msg2['content'])))),
                 )
             else:
                 pass

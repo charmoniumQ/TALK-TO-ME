@@ -3,7 +3,7 @@ import multiprocessing
 import re
 import os
 import functools
-from typing import TypeVar, Callable, Iterable, List, cast, Any, Tuple
+from typing import TypeVar, Callable, Iterable, List, cast, Any, Tuple, Dict
 
 
 _X = TypeVar('_X')
@@ -43,7 +43,7 @@ nparray = Any
 
 
 def split_include(delim_re: str, string: str) -> Iterable[str]:
-    def get_breakpoints():
+    def get_breakpoints() -> Iterable[int]:
         yield 0
         for match in re.finditer(delim_re, string):
             yield match.start()
@@ -53,3 +53,12 @@ def split_include(delim_re: str, string: str) -> Iterable[str]:
     breakpoints = list(get_breakpoints())
     for start, end in zip(breakpoints[:-1], breakpoints[1:]):
         yield string[start:end]
+
+
+_Key = TypeVar('_Key')
+_Val = TypeVar('_Val')
+def merge_dicts(dcts: Iterable[Dict[_Key, _Val]]) -> Dict[_Key, _Val]:
+    big_dct: Dict[_Key, _Val] = {}
+    for dct in dcts:
+        big_dct.update(dct)
+    return big_dct
