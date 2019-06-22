@@ -62,3 +62,6 @@ def merge_dicts(dcts: Iterable[Dict[_Key, _Val]]) -> Dict[_Key, _Val]:
     for dct in dcts:
         big_dct.update(dct)
     return big_dct
+
+
+bar = '\u2500' * 80

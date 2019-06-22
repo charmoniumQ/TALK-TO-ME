@@ -1,16 +1,13 @@
 import random
-from typing import Counter
-from typing import List, Dict, Tuple, Iterable
+import itertools
+from typing import Counter, List, Dict, Tuple, Iterable
 from nltk.util import ngrams
 import numpy as np
-from .util import Exchange, concat, merge_dicts
+from .util import Exchange, concat, merge_dicts, bar
 # from .words2sentence import words2sentence
 
 
-bar = '\u2500' * 80
-
-
-def exchanges_stats(exchanges: List[Exchange]) -> None:
+def exchanges_stats(exchanges: List[Exchange], interactive: bool = False) -> None:
     print(bar)
     print(f'Number of exchanges: {len(exchanges)}')
     print(f'Average prompt words: {np.mean([len(prompt) for prompt, _ in exchanges])}')
@@ -43,10 +40,14 @@ def exchanges_stats(exchanges: List[Exchange]) -> None:
     try:
         print(bar)
         print('View some of your hand-picked cringiest moments, courtesy of RNG')
-        # print('Ctrl+D to exit')
         print()
-        # while True:
-        for _ in range(100):
+
+        rnge: Iterable[int] = itertools.count() if interactive else range(100)
+
+        if interactive:
+            print('Ctrl+D to exit')
+
+        for _ in rnge:
             prompt, response = random.choice(exchanges)
             print(f'them: {prompt}')
             print(f'you: {response}')

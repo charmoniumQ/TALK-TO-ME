@@ -5,3 +5,4 @@ git+https://github.com/farizrahman4u/seq2seq.git
 tqdm
 Unidecode
 numpy
+tensorflow
