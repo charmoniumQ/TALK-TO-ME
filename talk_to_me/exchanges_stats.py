@@ -14,17 +14,6 @@ def exchanges_stats(exchanges: List[Exchange], interactive: bool = False) -> Non
     print(f'Average response words: {np.mean([len(response) for _, response in exchanges])}')
 
     def gen_sentences() -> Iterable[List[str]]:
-        def remove_ent(sentence: List[str]) -> Iterable[str]:
-            skip = False
-            for word in sentence:
-                if skip:
-                    skip = False
-                    continue
-                elif word.startswith('<') and word.endswith('>'):
-                    yield word
-                    skip = True
-                else:
-                    yield word
         for prompt, response in exchanges:
             yield list(remove_ent(prompt))
             yield list(remove_ent(response))
@@ -74,3 +63,16 @@ def get_n_grams(
             }),
         },
     ])
+
+
+def remove_ent(sentence: List[str]) -> Iterable[str]:
+    skip = False
+    for word in sentence:
+        if skip:
+            skip = False
+            continue
+        elif word.startswith('<') and word.endswith('>'):
+            yield word
+            skip = True
+        else:
+            yield word

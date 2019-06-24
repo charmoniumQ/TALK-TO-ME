@@ -83,6 +83,7 @@ def message2exchanges(name: str, obj: Any) -> Iterable[Exchange]:
             if 'content'in msg1 and 'content' in msg2:
                 # print(msg1['content'], '->', msg2['content'])
                 # TODO: Stop ignoring unicode smileys ('\u263A')
+                # TODO: Convert unicode apostrophe to '
                 yield (
                     list(filter(bool, sent2words(unidecode(msg1['content'])))),
                     list(filter(bool, sent2words(unidecode(msg2['content'])))),
