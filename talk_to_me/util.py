@@ -31,7 +31,7 @@ def list_f(func: Callable[..., Iterable[_V]]) -> Callable[..., List[_V]]:
     return cast(Callable[..., List[_V]], func2)
 
 
-Exchange = Tuple[List[str], List[str]]
+Exchange = Tuple[str, str]
 
 
 _W = TypeVar('_W')
@@ -65,3 +65,8 @@ def merge_dicts(dcts: Iterable[Dict[_Key, _Val]]) -> Dict[_Key, _Val]:
 
 
 bar = '\u2500' * 80
+
+_Key2 = TypeVar('_Key2')
+_Val2 = TypeVar('_Val2')
+def invert(dct: Dict[_Key2, _Val2]) -> Dict[_Val2, _Key2]:
+    return {val: key for key, val in dct.items()}

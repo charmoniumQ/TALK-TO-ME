@@ -1,10 +1,9 @@
 from pathlib import Path
-from typing import IO, Set, List, Tuple, Any, Iterable
+from typing import Set, Tuple, Any, Iterable
 import json
 import zipfile
 from unidecode import unidecode
 from .util import concat, Exchange
-from .sent2words import sent2words
 
 
 def fb_data2exchanges(name: str, input_p: Path) -> Iterable[Exchange]:
@@ -81,14 +80,9 @@ def message2exchanges(name: str, obj: Any) -> Iterable[Exchange]:
     for msg1, msg2 in zip(messages[:-1], messages[1:]):
         if msg2['sender_name'] == name:
             if 'content'in msg1 and 'content' in msg2:
-                # print(msg1['content'], '->', msg2['content'])
                 # TODO: Stop ignoring unicode smileys ('\u263A')
                 # TODO: Convert unicode apostrophe to '
                 yield (
-                    list(filter(bool, sent2words(unidecode(msg1['content'])))),
-                    list(filter(bool, sent2words(unidecode(msg2['content'])))),
+                    unidecode(msg1['content']),
+                    unidecode(msg2['content']),
                 )
-            else:
-                pass
-                # print(msg1, msg2)
-                # raise RuntimeError()

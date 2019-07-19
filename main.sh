@@ -11,9 +11,9 @@ fi
 
 set -e -x
 
-pip3 install -r dev-requirements.txt -r requirements.txt
+# pip3 install -r dev-requirements.txt -r requirements.txt
 
-python3 -m mypy --ignore-missing-imports --strict -p ${package}
+MYPYPATH=./stubs python3 -m mypy --ignore-missing-imports --strict -p ${package}
 
 # python3 -m pylint
 

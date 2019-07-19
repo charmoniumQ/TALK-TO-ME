@@ -2,21 +2,31 @@ import random
 import itertools
 from typing import Counter, List, Dict, Tuple, Iterable
 from nltk.util import ngrams
+from tqdm import tqdm
 import numpy as np
 from .util import Exchange, concat, merge_dicts, bar
-# from .words2sentence import words2sentence
+from .string2words import string2words, remove_ents
 
 
-def exchanges_stats(exchanges: List[Exchange], interactive: bool = False) -> None:
+def exchanges_stats(
+        exchanges_: Iterable[Exchange], interactive: bool = False
+) -> List[Exchange]:
     print(bar)
+    exchanges = list(tqdm(exchanges_, desc='loading data'))
     print(f'Number of exchanges: {len(exchanges)}')
-    print(f'Average prompt words: {np.mean([len(prompt) for prompt, _ in exchanges])}')
-    print(f'Average response words: {np.mean([len(response) for _, response in exchanges])}')
+    exchanged_words = [
+        (string2words(prompt), string2words(response))
+        for prompt, response in exchanges
+    ]
+    avg_prompt = np.mean([len(prompt) for prompt, _ in exchanged_words])
+    print(f'Average prompt words: {avg_prompt:.1f}')
+    avg_response = np.mean([len(response) for _, response in exchanged_words])
+    print(f'Average response words: {avg_response:.1f}')
 
     def gen_sentences() -> Iterable[List[str]]:
-        for prompt, response in exchanges:
-            yield list(remove_ent(prompt))
-            yield list(remove_ent(response))
+        for prompt, response in exchanged_words:
+            yield list(remove_ents(prompt))
+            yield list(remove_ents(response))
 
     n_gram_counters = get_n_grams(list(gen_sentences()), max_n=5)
     for n, n_gram_counter in sorted(n_gram_counters.items()):
@@ -45,6 +55,8 @@ def exchanges_stats(exchanges: List[Exchange], interactive: bool = False) -> Non
     except EOFError:
         pass
 
+    return exchanges
+
 
 def get_n_grams(
         sentences: List[List[str]], max_n: int = 3
@@ -63,16 +75,3 @@ def get_n_grams(
             }),
         },
     ])
-
-
-def remove_ent(sentence: List[str]) -> Iterable[str]:
-    skip = False
-    for word in sentence:
-        if skip:
-            skip = False
-            continue
-        elif word.startswith('<') and word.endswith('>'):
-            yield word
-            skip = True
-        else:
-            yield word

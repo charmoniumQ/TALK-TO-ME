@@ -4,11 +4,11 @@ from nltk.tokenize import TweetTokenizer
 from .util import concat, split_include
 
 
-_sent2words = TweetTokenizer()
+_string2words = TweetTokenizer()
 
 
-def sent2words(sent: str) -> List[str]:
-    words = _sent2words.tokenize(sent)
+def string2words(string: str) -> List[str]:
+    words = _string2words.tokenize(string)
 
     def retokenize(word: str) -> Iterable[str]:
         # TODO: retokenize ascii smileys as one token
@@ -38,3 +38,20 @@ def sent2words(sent: str) -> List[str]:
                     yield new_word.lower()
 
     return list(concat([retokenize(word) for word in words]))
+
+
+def remove_ents(words: List[str]) -> Iterable[str]:
+    skip = False
+    for word in words:
+        if skip:
+            skip = False
+            continue
+        elif word.startswith('<') and word.endswith('>'):
+            yield word
+            skip = True
+        else:
+            yield word
+
+
+def pad_words(words: List[str]) -> List[str]:
+    return ['<start>'] + words + ['<end>']
