@@ -12,4 +12,5 @@ exchanges = talk_to_me.exchanges_stats(exchanges, interactive=False)
 
 bot = talk_to_me.Bot()
 bot.fit(exchanges)
+print('hi')
 bot.interact()

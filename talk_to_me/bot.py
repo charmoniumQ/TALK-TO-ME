@@ -60,6 +60,10 @@ class Bot:
         # )
 
     def fit(self, exchanges: List[Exchange]) -> None:
+        ########################
+        # Compute the vocabulary
+        ########################
+
         exchanged_words = [
             (
                 list(remove_ents(string2words(prompt))),
@@ -68,7 +72,6 @@ class Bot:
             for prompt, response in exchanges
         ]
 
-        # I use `lambda message: list(message)` instead of `list` to satisfy mypy
         words = [
             word
             for exchange in exchanged_words
@@ -77,16 +80,22 @@ class Bot:
         ]
 
         self.word2int.fit(words)
+
+        # int2vec is a one-hot encoder
         self.int2vec = Int2Vec(len(self.word2int))
 
 
+        ####################
+        # Model architecture
+        ####################
+
         # many-to-one RNN
         # w_0 w_1 ... [w_i w_{i+1} ... w_{i+w}]
-        #             | |
-        #             | |
-        #             | |
-        #              V
-        # v_0 v_1 ... v_i
+        #              | |
+        #              | |
+        #              | |
+        #               V
+        # v_0 v_1 ...  v_i
         self.vectors2vectors = Sequential([
             Embedding(
                 input_dim=len(self.word2int),
@@ -106,29 +115,52 @@ class Bot:
             optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']
         )
 
-        # self.word2vector.build_vocab(sentences=messages)
-        # self.word2vector.train(
-        #     sentences=messages, total_examples=len(messages), epoch=10,
-        # )
+        #######################
+        # get the training data
+        #######################
 
-        xs = []
-        ys = []
+        # a train_input is a list of self.encoding_window consecutive one-hot vectors
+        # a train_output is one one-hot vector
+
+        train_inputs = []
+        train_outputs = []
         for exchange in exchanged_words:
             prompt, response = exchange
-            padding_length = len(prompt) - len(response) + self.encoding_window
+
+            # I will possibly need padding, so that when we run out of input (w_{n-1})
+            # but we still have output (v_{m-1}), we still know how to compute it.
+
+            # [w_{n-2} w_{n-1} PAD PAD PAD]
+            #  | |
+            #  | |
+            #  | |
+            #   V
+            #  v_m
+
+            padding_length = len(response) - len(prompt) + self.encoding_window
             if padding_length > 0:
                 prompt = prompt + ['<empty>'] * padding_length
             for i in range(len(response)):
-                xs.append([
+                assert len(prompt[i:i + self.encoding_window]) == self.encoding_window
+                train_inputs.append([
                     self.int2vec.transform(self.word2int.transform(word))
                     for word in prompt[i:i + self.encoding_window]
                 ])
-                ys.append(self.int2vec.transform(self.word2int.transform(response[i])))
+                train_outputs.append(self.int2vec.transform(self.word2int.transform(response[i])))
 
-        npxs, npys = np.array(xs), np.array(ys)
+        train_inputs = np.array(train_inputs)
+        train_outputs = np.array(train_outputs)
+        print(train_inputs.shape, train_outputs.shape)
+
+        #################
+        # actual training
+        #################
+
+        # :D
 
         self.vectors2vectors.fit(
-            npxs, npys,
+            train_inputs,
+            train_outputs,
             batch_size=2048, epochs=150,
             callbacks=[
                 EarlyStopping(monitor='val_loss', patience=5),
@@ -141,6 +173,7 @@ class Bot:
         )
 
     def transform(self, prompt_string: str) -> str:
+        # split prompt into words, and then the words into vectors
         prompt_words = list(map(
             self.int2vec.transform,
             map(
@@ -148,12 +181,17 @@ class Bot:
                 string2words(prompt_string)
             )
         ))
+
+        # get seq2seq magic
         response_words = self.vectors2vectors.transform(prompt_words)
+
+        # turn vectors into words, and words into string
         response_string = words2string(
             list(map(self.word2int.inverse_transform,
                      map(self.int2vec.inverse_transform, response_words)
             ))
         )
+
         return response_string
 
     def interact(self) -> None:
