@@ -122,8 +122,8 @@ class Bot:
         # a train_input is a list of self.encoding_window consecutive one-hot vectors
         # a train_output is one one-hot vector
 
-        train_inputs = []
-        train_outputs = []
+        train_input_list = []
+        train_output_list = []
         for exchange in exchanged_words:
             prompt, response = exchange
 
@@ -142,14 +142,14 @@ class Bot:
                 prompt = prompt + ['<empty>'] * padding_length
             for i in range(len(response)):
                 assert len(prompt[i:i + self.encoding_window]) == self.encoding_window
-                train_inputs.append([
+                train_input_list.append([
                     self.int2vec.transform(self.word2int.transform(word))
                     for word in prompt[i:i + self.encoding_window]
                 ])
-                train_outputs.append(self.int2vec.transform(self.word2int.transform(response[i])))
+                train_output_list.append(self.int2vec.transform(self.word2int.transform(response[i])))
 
-        train_inputs = np.array(train_inputs)
-        train_outputs = np.array(train_outputs)
+        train_inputs = np.array(train_input_list)
+        train_outputs = np.array(train_output_list)
         print(train_inputs.shape, train_outputs.shape)
 
         #################
@@ -158,6 +158,7 @@ class Bot:
 
         # :D
 
+        print('starting training')
         self.vectors2vectors.fit(
             train_inputs,
             train_outputs,
@@ -171,6 +172,7 @@ class Bot:
                 ),
             ],
         )
+        print('done training')
 
     def transform(self, prompt_string: str) -> str:
         # split prompt into words, and then the words into vectors
