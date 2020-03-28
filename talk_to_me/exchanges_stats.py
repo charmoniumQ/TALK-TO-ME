@@ -43,17 +43,17 @@ def exchanges_stats(
 
         rnge: Iterable[int] = itertools.count() if interactive else range(100)
 
-        if interactive:
-            print('Ctrl+D to exit')
+    print(bar)
+    print('Randomly selected chats')
+    print()
 
-        for _ in rnge:
-            prompt, response = random.choice(exchanges)
-            print(f'them: {prompt}')
-            print(f'you: {response}')
-            print()
-            # input()
-    except EOFError:
-        pass
+    rnge = cast(Iterable[Any], interactive_loop() if interactive else range(100))
+
+    for _ in rnge:
+        prompt, response = random.choice(exchanges)
+        print(f'them: {prompt}')
+        print(f'you: {response}')
+        print()
 
     return exchanges
 

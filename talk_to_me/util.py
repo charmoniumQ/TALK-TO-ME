@@ -3,19 +3,28 @@ import multiprocessing
 import re
 import os
 import functools
-from typing import TypeVar, Callable, Iterable, List, cast, Any, Tuple, Dict
+from typing import (
+    TypeVar, Callable, Iterable, List, cast, Any, Tuple, Dict,
+    Generator, Collection, Sized, Iterator, Optional, TYPE_CHECKING
+)
 
 
-_X = TypeVar('_X')
-def concat(it: Iterable[Iterable[_X]]) -> Iterable[_X]:
-    return itertools.chain.from_iterable(it)
+# iterables.chain.from_iterable is a long and ugly name
+concat = itertools.chain.from_iterable
 
 
 n_procs = os.cpu_count() or 1
-_pool = multiprocessing.Pool(n_procs)
 _T = TypeVar('_T')
 _U = TypeVar('_U')
-def imap(func: Callable[[_T], _U], iterable: List[_T]) -> Iterable[_U]:
+if TYPE_CHECKING:
+    pool_type = multiprocessing.pool.Pool
+else:
+    pool_type = None
+_pool: Optional[pool_type] = None
+def imap(func: Callable[[_T], _U], iterable: Collection[_T]) -> Iterable[_U]:
+    global _pool
+    if not _pool:
+        _pool = multiprocessing.Pool(n_procs)
     chunk_size = len(iterable) // n_procs // 20
     return _pool.imap_unordered(func, iterable, chunk_size)
 

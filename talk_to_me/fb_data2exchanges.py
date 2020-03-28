@@ -3,29 +3,10 @@ from typing import Set, Tuple, Any, Iterable
 import json
 import zipfile
 from unidecode import unidecode
-from .util import concat, Exchange
+from .util import concat, Exchange, imap
 
 
 def fb_data2exchanges(name: str, input_p: Path) -> Iterable[Exchange]:
-    '''converts your Facebook data into a corpus for TALK TO ME
-
-[Download your fb data][1] with these options:
-
-date_range: all
-format: JSON
-quality: low
-files:
-  - posts
-  - comments
-  - messages
-
-[1]: https://www.facebook.com/help/212802592074644?helpref=faq_content
-
-incpy.memoize
-
-    '''
-        
-
     with zipfile.ZipFile(input_p, 'r') as input_zip:
         paths = {
             tuple(path.split('/'))

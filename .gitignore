@@ -2,3 +2,5 @@ env/
 *.pgy[cod]
 .mypy_cache/
 **/__pycache__
+facebook-*.zip
+.dmypy.json

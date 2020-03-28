@@ -10,8 +10,13 @@ Maybe eventually, it will not crash.
 ## Installation instructions
 
 1. Clone the repo.
-2. Download your data according to [`talk_to_me/fb_data2exchanges.py:L13`][1].
-3. Modify `main.py` to point to your data and your name.
-4. Run `main.sh` (It will take care of venv, requirements, etc.).
+2. [Download your fb data][1] with these options:
+  - date_range: all
+  - format: JSON
+  - quality: low
+  - files:
+    - messages
+3. Place the unmodified zip here.
+4. Modify, read, and run `main.sh` (modify the last line).
 
-[1]: https://github.com/charmoniumQ/TALK-TO-ME/blob/master/talk_to_me/fb_data2exchanges.py#L13
+[1]: https://www.facebook.com/help/212802592074644?helpref=faq_content
