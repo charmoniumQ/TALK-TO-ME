@@ -4,9 +4,21 @@ import re
 import os
 import functools
 from typing import (
-    TypeVar, Callable, Iterable, List, cast, Any, Tuple, Dict,
-    Generator, Collection, Sized, Iterator, Optional, TYPE_CHECKING,
-    Pattern, Union,
+    TypeVar,
+    Callable,
+    Iterable,
+    List,
+    cast,
+    Any,
+    Tuple,
+    Dict,
+    Generator,
+    Collection,
+    Iterator,
+    Optional,
+    TYPE_CHECKING,
+    Pattern,
+    Union,
 )
 
 
@@ -15,13 +27,15 @@ concat = itertools.chain.from_iterable
 
 
 n_procs = os.cpu_count() or 1
-_T = TypeVar('_T')
-_U = TypeVar('_U')
+_T = TypeVar("_T")
+_U = TypeVar("_U")
 if TYPE_CHECKING:
-    pool_type = multiprocessing.pool.Pool
+    PoolType = multiprocessing.pool.Pool
 else:
-    pool_type = None
-_pool: Optional[pool_type] = None
+    PoolType = None
+_pool: Optional[PoolType] = None
+
+
 def imap(func: Callable[[_T], _U], iterable: Collection[_T]) -> Iterable[_U]:
     global _pool
     if not _pool:
@@ -30,7 +44,7 @@ def imap(func: Callable[[_T], _U], iterable: Collection[_T]) -> Iterable[_U]:
     return _pool.imap_unordered(func, iterable, chunk_size)
 
 
-#_V = TypeVar('_V')
+# _V = TypeVar('_V')
 _V = Any
 # _IterableF = TypeVar('_IterableF', bound=)
 # _ListF = TypeVar('_ListF', bound=)
@@ -38,13 +52,16 @@ def list_f(func: Callable[..., Iterable[_V]]) -> Callable[..., List[_V]]:
     @functools.wraps(func)
     def func2(*args: Any, **kwargs: Any) -> List[_V]:
         return list(func(*args, **kwargs))
+
     return cast(Callable[..., List[_V]], func2)
 
 
 Exchange = Tuple[str, str]
 
 
-_W = TypeVar('_W')
+_W = TypeVar("_W")
+
+
 def transpose(lists: Iterable[Iterable[_W]]) -> Iterable[Iterable[_W]]:
     return list(zip(*lists))
 
@@ -65,25 +82,29 @@ def split_include(delim_re: Union[str, Pattern[str]], string: str) -> Iterable[s
         yield string[start:end]
 
 
-_Key = TypeVar('_Key')
-_Val = TypeVar('_Val')
+_Key = TypeVar("_Key")
+_Val = TypeVar("_Val")
+
+
 def merge_dicts(dcts: Iterable[Dict[_Key, _Val]]) -> Dict[_Key, _Val]:
-    big_dct: Dict[_Key, _Val] = {}
+    merged_dct: Dict[_Key, _Val] = {}
     for dct in dcts:
-        big_dct.update(dct)
-    return big_dct
+        merged_dct.update(dct)
+    return merged_dct
 
 
-bar = '\u2500' * 80
+hbar = "\u2500" * 80
 
-_Key2 = TypeVar('_Key2')
-_Val2 = TypeVar('_Val2')
+_Key2 = TypeVar("_Key2")
+_Val2 = TypeVar("_Val2")
+
+
 def invert(dct: Dict[_Key2, _Val2]) -> Dict[_Val2, _Key2]:
     return {val: key for key, val in dct.items()}
 
 
 def interactive_loop() -> Generator[str, None, List[str]]:
-    print('Press Enter to submit, Ctrl+D to quit')
+    print("Press Enter to submit, Ctrl+D to quit")
     inputs = []
     try:
         while True:
@@ -99,8 +120,10 @@ def _intercalate_helper(lst: Iterator[_T], sep: _T) -> Iterator[_T]:
         yield sep
         yield elem
 
+
 def intercalate(lst: Iterator[_T], sep: _T) -> Iterator[_T]:
     return itertools.islice(_intercalate_helper(lst, sep), 1, None, None)
+
 
 def iter_replace(lst: Iterable[_T], find: _T, sub: _T) -> Iterable[_T]:
     for elem in lst:
@@ -108,6 +131,7 @@ def iter_replace(lst: Iterable[_T], find: _T, sub: _T) -> Iterable[_T]:
             yield sub
         else:
             yield elem
+
 
 def reverse(it: List[_T]) -> List[_T]:
     return it[::-1]

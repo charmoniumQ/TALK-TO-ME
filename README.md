@@ -18,5 +18,8 @@ Maybe eventually, it will not crash.
     - messages
 3. Place the unmodified zip here.
 4. Modify, read, and run `main.sh` (modify the last line).
+5. To hack on this, run `devmain.sh` instead. If you have already run
+   `main.sh`, `rm -rf env/` so that `devmain.sh` installs
+   dev-dependencies.
 
 [1]: https://www.facebook.com/help/212802592074644?helpref=faq_content
