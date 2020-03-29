@@ -1,8 +1,9 @@
 nltk
-gensim
 git+https://github.com/datalogai/recurrentshop.git
 git+https://github.com/farizrahman4u/seq2seq.git
 tqdm
 Unidecode
 numpy
-tensorflow
+# gensim
+# tensorflow
+torch

@@ -23,7 +23,7 @@ MYPYPATH=./stubs \
 
 # python3 -m pylint
 
-# python3 -m pytest -v
+python3 -m pytest -vv
 
 if command -v scc
 then

@@ -1,23 +1,26 @@
 import random
-import itertools
-from typing import Counter, List, Dict, Tuple, Iterable
+from typing import Counter, DefaultDict, List, Dict, Tuple, Iterable, Any, cast
 from nltk.util import ngrams
 from tqdm import tqdm
 import numpy as np
-from .util import Exchange, concat, merge_dicts, bar
-from .string2words import string2words, remove_ents
+from .util import Exchange, concat, merge_dicts, bar, interactive_loop, reverse, imap
+from .string2words import string2words, remove_ents, words2string
+
+
+def exchange2words(prompt_response: Tuple[str, str]) -> Tuple[List[str], List[str]]:
+    return (string2words(prompt_response[0]), string2words(prompt_response[1]))
 
 
 def exchanges_stats(
         exchanges_: Iterable[Exchange], interactive: bool = False
 ) -> List[Exchange]:
     print(bar)
-    exchanges = list(tqdm(exchanges_, desc='loading data'))
+    exchanges = list(exchanges_)
     print(f'Number of exchanges: {len(exchanges)}')
-    exchanged_words = [
-        (string2words(prompt), string2words(response))
-        for prompt, response in exchanges
-    ]
+    exchanged_words = list(map(exchange2words, exchanges))
+
+    print(bar)
+
     avg_prompt = np.mean([len(prompt) for prompt, _ in exchanged_words])
     print(f'Average prompt words: {avg_prompt:.1f}')
     avg_response = np.mean([len(response) for _, response in exchanged_words])
@@ -34,14 +37,29 @@ def exchanges_stats(
         print(bar)
         print(f'Most common {n}-grams:')
         for gram, count in n_gram_counter.most_common(num_of_grams):
-            print(f'{count: 3d} {" ".join(gram)}')
+            print(f'{count: 3d} {words2string(gram)}')
 
-    try:
-        print(bar)
-        print('View some of your hand-picked cringiest moments, courtesy of RNG')
+    print(bar)
+    ents: DefaultDict[str, Counter[str]] = DefaultDict(Counter)
+    for msg_pair in exchanged_words:
+        for msg in msg_pair:
+            for word, next_word in zip(msg[:-1], msg[1:]):
+                if word.startswith('<') and word.endswith('>'):
+                    ents[word][next_word] += 1
+    for ent_name, counter in ents.items():
+        print(f'Top {ent_name}:', end=' ')
+        for ent_val, count in counter.most_common(10):
+            print(ent_val, end=' ')
         print()
 
-        rnge: Iterable[int] = itertools.count() if interactive else range(100)
+    print(bar)
+
+    print('Rare and valuable words (least common):')
+    for _word, count in reverse(n_gram_counters[1].most_common())[:150]:
+        if count > 1:
+            break
+        word = _word[0]
+        print(count, word)
 
     print(bar)
     print('Randomly selected chats')
@@ -52,7 +70,9 @@ def exchanges_stats(
     for _ in rnge:
         prompt, response = random.choice(exchanges)
         print(f'them: {prompt}')
+        print(f'{string2words(prompt)}')
         print(f'you: {response}')
+        print(f'{string2words(response)}')
         print()
 
     return exchanges

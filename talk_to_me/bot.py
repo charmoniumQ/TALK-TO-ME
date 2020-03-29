@@ -5,8 +5,7 @@ from keras.layers import LSTM, Dense, Dropout, Masking, Embedding
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from gensim.models import FastText
 import numpy as np
-from .string2words import string2words, remove_ents
-from .words2string import words2string
+from .string2words import string2words, remove_ents, words2string
 from .util import transpose, Exchange, bar, n_procs, concat, invert, nparray
 
 
